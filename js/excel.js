@@ -86,6 +86,34 @@ export function parseExcelFile(file) {
   });
 }
 
+export function downloadTemplate() {
+  const lang = getLang();
+  const isAr = lang === "ar";
+
+  const headers = [
+    t("excelName"),
+    t("excelPhone"),
+    t("excelConfirmed"),
+    t("excelCommunicated"),
+    t("excelChildren"),
+    t("excelNotes"),
+  ];
+
+  const exampleRow = isAr
+    ? ["محمد أحمد", "0501234567", "نعم", "لا", "سارة, علي", "ملاحظة"]
+    : ["John Doe", "0501234567", "Yes", "No", "Sara, Ali", "Note"];
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, exampleRow]);
+  ws["!cols"] = headers.map((h, i) => ({
+    wch: Math.max(h.length, String(exampleRow[i]).length) + 4,
+  }));
+
+  const wb = XLSX.utils.book_new();
+  const sheetName = isAr ? "قالب_المدعوين" : "Guest_Template";
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, `${sheetName}.xlsx`);
+}
+
 function parseBool(val) {
   if (typeof val === "boolean") return val;
   if (typeof val === "string") {

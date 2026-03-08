@@ -9,7 +9,7 @@ import {
   removeChildFromGuest,
   importGuests,
 } from "./firestore.js";
-import { exportToExcel, parseExcelFile } from "./excel.js";
+import { exportToExcel, parseExcelFile, downloadTemplate } from "./excel.js";
 
 // State
 let currentTab = "groom_guests";
@@ -27,6 +27,7 @@ const searchInput = document.getElementById("search-input");
 const addGuestBtn = document.getElementById("add-guest-btn");
 const importBtn = document.getElementById("import-btn");
 const exportBtn = document.getElementById("export-btn");
+const templateBtn = document.getElementById("template-btn");
 const fileInput = document.getElementById("file-input");
 const guestTableBody = document.getElementById("guest-table-body");
 const modalOverlay = document.getElementById("modal-overlay");
@@ -69,6 +70,7 @@ function setupEventListeners() {
   addGuestBtn.addEventListener("click", () => openAddModal());
   importBtn.addEventListener("click", () => fileInput.click());
   exportBtn.addEventListener("click", handleExport);
+  templateBtn.addEventListener("click", downloadTemplate);
 
   fileInput.addEventListener("change", handleImport);
 
@@ -161,6 +163,7 @@ function renderAll() {
   addGuestBtn.innerHTML = `<span>+</span> ${t("addGuest")}`;
   importBtn.textContent = t("importExcel");
   exportBtn.textContent = t("exportExcel");
+  templateBtn.textContent = t("downloadTemplate");
 
   // Update table headers
   renderTableHeaders();
