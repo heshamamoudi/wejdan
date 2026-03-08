@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>هشام & وجدان — إدارة دعوات الزفاف</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💍</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ivory: #FDF8F5;
+      --gold: #B76E79;
+      --gold-light: #E8C4C8;
+      --gold-dark: #8C4A52;
+      --champagne: #F9ECEE;
+      --charcoal: #3D2C2E;
+      --white: #FFFFFF;
+      --green: #6B8F71;
+      --green-bg: #EDF3EE;
+      --red: #C06070;
+      --red-bg: #FBF0F1;
+      --blue: #7B9BAA;
+      --blue-bg: #EFF4F6;
+      --orange: #C4956A;
+      --orange-bg: #FBF3EC;
+      --gray: #A89A9C;
+      --gray-light: #FAF6F5;
+      --shadow: 0 2px 16px rgba(183,110,121,0.08);
+      --shadow-lg: 0 8px 32px rgba(183,110,121,0.12);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --transition: all 0.3s ease;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+      background: linear-gradient(170deg, #FFFFFF 0%, #FEF7F4 20%, #FCF0EC 45%, #FDF5F2 70%, #FFFAF8 100%);
+      background-attachment: fixed;
+      color: var(--charcoal);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    [dir="ltr"] body { font-family: 'Inter', 'Cairo', sans-serif; }
+
+    /* ===== FALLING PETALS CANVAS ===== */
+    #petals-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .lang-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 100;
+      background: var(--white);
+      border: 2px solid var(--gold);
+      color: var(--gold-dark);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    [dir="rtl"] .lang-toggle { right: auto; left: 16px; }
+    .lang-toggle:hover { background: var(--gold); color: var(--white); }
+
+    /* ===== HERO ===== */
+    .hero {
+      text-align: center;
+      padding: 35px 20px 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .canvas-container {
+      width: 100%;
+      max-width: 420px;
+      height: 220px;
+      margin: 0 auto;
+    }
+
+    .canvas-container canvas { display: block; width: 100%; height: 100%; }
+
+    /* ===== CIRCULAR COUNTDOWN ===== */
+    .countdown {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin: 15px 0 20px;
+      flex-wrap: wrap;
+    }
+
+    .countdown-ring {
+      position: relative;
+      width: 72px;
+      height: 72px;
+    }
+
+    .countdown-ring svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .countdown-ring .ring-bg {
+      fill: none;
+      stroke: var(--champagne);
+      stroke-width: 4;
+    }
+
+    .countdown-ring .ring-fill {
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 4;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .countdown-ring-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .countdown-ring-number {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold-dark);
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+    }
+
+    .countdown-ring-label {
+      font-size: 9px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .wedding-day-msg {
+      font-size: 28px;
+      color: var(--gold-dark);
+      font-weight: 700;
+      margin: 20px 0 30px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 0 auto 15px;
+      max-width: 250px;
+    }
+
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-light), transparent);
+    }
+
+    .divider-icon { color: var(--gold); font-size: 18px; }
+
+    /* ===== MAIN CONTENT ===== */
+    .tabs-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 16px 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 8px 24px;
+      border: 2px solid var(--gold);
+      background: var(--white);
+      color: var(--gold-dark);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .tab-btn.active { background: var(--gold); color: var(--white); }
+    .tab-btn:hover:not(.active) { background: var(--champagne); }
+
+    .toolbar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 16px;
+      border: 1px solid var(--gold-light);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: inherit;
+      transition: var(--transition);
+      background: var(--white);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(183, 110, 121, 0.12);
+    }
+
+    .btn {
+      padding: 7px 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .btn-gold { background: var(--gold); color: var(--white); }
+    .btn-gold:hover { background: var(--gold-dark); }
+    .btn-outline { background: var(--white); color: var(--gold-dark); border: 1px solid var(--gold); }
+    .btn-outline:hover { background: var(--champagne); }
+    .btn-danger { background: var(--red); color: var(--white); }
+    .btn-danger:hover { background: #A04050; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+    .summary-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      box-shadow: var(--shadow);
+      border: 1px solid #f5eded;
+    }
+
+    .stat-chip .stat-num {
+      font-weight: 700;
+      font-size: 16px;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .stat-chip .stat-label {
+      color: var(--gray);
+      font-size: 11px;
+    }
+
+    .stat-chip.green .stat-num { color: var(--green); }
+    .stat-chip.red .stat-num { color: var(--red); }
+    .stat-chip.blue .stat-num { color: var(--blue); }
+    .stat-chip.orange .stat-num { color: var(--orange); }
+    .stat-chip.default .stat-num { color: var(--gold-dark); }
+
+    .table-wrapper {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .guest-table { width: 100%; border-collapse: collapse; }
+
+    .guest-table th {
+      background: var(--champagne);
+      padding: 14px 16px;
+      text-align: start;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .guest-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f5eded;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .guest-table tr:last-child td { border-bottom: none; }
+    .guest-table tr:hover td { background: rgba(249, 236, 238, 0.4); }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-green { background: var(--green-bg); color: var(--green); }
+    .badge-red { background: var(--red-bg); color: var(--red); }
+    .badge-blue { background: var(--blue-bg); color: var(--blue); }
+    .badge-orange { background: var(--orange-bg); color: var(--orange); }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--gold-light);
+      border-radius: 24px;
+      transition: var(--transition);
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: var(--white);
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+
+    .toggle input:checked + .toggle-slider { background: var(--green); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+    [dir="rtl"] .toggle-slider::before { left: auto; right: 3px; }
+    [dir="rtl"] .toggle input:checked + .toggle-slider::before { transform: translateX(-20px); }
+
+    .children-container { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+    .child-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--champagne);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .child-chip .remove-child {
+      cursor: pointer;
+      color: var(--red);
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+      background: none;
+      padding: 0 2px;
+      line-height: 1;
+    }
+
+    .add-child-inline { display: inline-flex; gap: 4px; align-items: center; }
+
+    .add-child-inline input {
+      width: 100px;
+      padding: 3px 8px;
+      border: 1px solid var(--gold-light);
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .add-child-inline input:focus { outline: none; border-color: var(--gold); }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--gold-dark);
+      transition: var(--transition);
+      padding: 4px;
+    }
+
+    .expand-btn:hover { color: var(--gold); }
+    .children-row { display: none; }
+    .children-row.open { display: table-row; }
+    .children-row td { background: var(--gray-light); padding: 10px 16px 10px 40px; }
+    [dir="rtl"] .children-row td { padding: 10px 40px 10px 16px; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(61, 44, 46, 0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow-lg);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold-dark);
+      margin-bottom: 24px;
+      font-size: 22px;
+    }
+
+    [dir="rtl"] .modal h2 { font-family: 'Tajawal', serif; }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--charcoal);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--gold-light);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(183, 110, 121, 0.12);
+    }
+
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .form-children { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      justify-content: flex-end;
+    }
+
+    [dir="rtl"] .modal-actions { justify-content: flex-start; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--gray); }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+
+    .loading { text-align: center; padding: 40px; color: var(--gray); }
+
+    .spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--champagne);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    [dir="rtl"] .toast-container { right: auto; left: 20px; }
+
+    .toast {
+      background: var(--charcoal);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.3s ease;
+      max-width: 350px;
+    }
+
+    .toast.success { background: var(--green); }
+    .toast.error { background: var(--red); }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(61, 44, 46, 0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 250;
+    }
+
+    .confirm-overlay.active { display: flex; }
+
+    .confirm-box {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .confirm-box p { margin-bottom: 20px; font-size: 16px; }
+    .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+
+    .file-input-hidden { display: none; }
+
+    .floral-bottom {
+      text-align: center;
+      color: var(--gold-light);
+      font-size: 24px;
+      opacity: 0.6;
+      letter-spacing: 8px;
+      user-select: none;
+      margin-top: 30px;
+      padding-bottom: 20px;
+    }
+
+    .error-banner {
+      background: var(--red-bg);
+      color: var(--red);
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 13px;
+      display: none;
+      position: relative;
+      z-index: 2;
+    }
+
+    .error-banner.show { display: block; }
+
+    @media (max-width: 768px) {
+      .hero { padding: 25px 12px 0; }
+      .canvas-container { height: 180px; }
+      .countdown { gap: 8px; margin: 10px 0 14px; }
+      .countdown-ring { width: 60px; height: 60px; }
+      .countdown-ring-number { font-size: 16px; }
+      .countdown-ring-label { font-size: 8px; }
+      .tabs-container { padding: 0 10px 20px; }
+      .tab-btn { padding: 7px 16px; font-size: 13px; }
+      .toolbar { gap: 5px; }
+      .search-input { min-width: auto; flex: 1; min-width: 120px; }
+      .summary-bar { gap: 5px; }
+      .stat-chip { padding: 4px 10px; font-size: 11px; }
+      .stat-chip .stat-num { font-size: 14px; }
+
+      .table-wrapper { background: none; box-shadow: none; }
+      .guest-table, .guest-table thead, .guest-table tbody,
+      .guest-table th, .guest-table td, .guest-table tr { display: block; }
+      .guest-table thead { display: none; }
+
+      .guest-table tr {
+        background: var(--white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 12px;
+        padding: 16px;
+      }
+
+      .guest-table td {
+        padding: 6px 0;
+        border-bottom: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .guest-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 12px;
+        color: var(--gold-dark);
+        min-width: 100px;
+      }
+
+      .guest-table tr:hover td { background: none; }
+      .children-row td { padding: 10px 0; }
+      .children-row td::before { display: none; }
+      .modal { padding: 24px 20px; max-height: 85vh; }
+
+      .actions-cell {
+        justify-content: flex-end !important;
+        gap: 6px;
+        padding-top: 10px !important;
+        border-top: 1px solid #f5eded !important;
+        margin-top: 6px;
+      }
+
+      .actions-cell::before { display: none !important; }
+    }
+
+    @media (max-width: 400px) {
+      .countdown-ring { width: 52px; height: 52px; }
+      .countdown-ring-number { font-size: 14px; }
+      .countdown { gap: 6px; }
+      .stat-chip { padding: 3px 8px; }
+      .stat-chip .stat-num { font-size: 13px; }
+      .stat-chip .stat-label { font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Falling Petals (full page) -->
+  <canvas id="petals-canvas"></canvas>
+
+  <!-- Language Toggle -->
+  <button id="lang-toggle" class="lang-toggle">EN</button>
+
+  <!-- Error Banner -->
+  <div id="error-banner" class="error-banner"></div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="canvas-container">
+      <canvas id="monogram-canvas"></canvas>
+    </div>
+    <div class="countdown" id="countdown"></div>
+    <div class="divider">
+      <span class="divider-line"></span>
+      <span class="divider-icon">💍</span>
+      <span class="divider-line"></span>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button id="groom-tab" class="tab-btn active">قائمة العريس</button>
+      <button id="bride-tab" class="tab-btn">قائمة العروس</button>
+    </div>
+
+    <div class="summary-bar" id="summary-cards"></div>
+
+    <div class="toolbar">
+      <input type="text" id="search-input" class="search-input" placeholder="بحث...">
+      <button id="add-guest-btn" class="btn btn-gold"><span>+</span> إضافة مدعو</button>
+      <button id="import-btn" class="btn btn-outline">استيراد من Excel</button>
+      <button id="export-btn" class="btn btn-outline">تصدير إلى Excel</button>
+      <input type="file" id="file-input" class="file-input-hidden" accept=".xlsx,.xls,.csv">
+    </div>
+
+    <div class="table-wrapper">
+      <table class="guest-table">
+        <thead id="guest-table-head">
+          <tr><th></th><th>الاسم</th><th>رقم الجوال</th><th>الأطفال</th><th>تم التواصل</th><th>تم التأكيد</th><th>ملاحظات</th><th></th></tr>
+        </thead>
+        <tbody id="guest-table-body">
+          <tr><td colspan="8"><div class="loading"><div class="spinner"></div><p style="margin-top:12px">جاري التحميل...</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="height:20px"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal-content"></div>
+  </div>
+
+  <!-- Confirm -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-box">
+      <p id="confirm-message">هل أنت متأكد؟</p>
+      <div class="confirm-actions">
+        <button id="confirm-yes" class="btn btn-danger">نعم</button>
+        <button id="confirm-no" class="btn btn-outline">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <script>
+  // ==========================================
+  // TRANSLATIONS
+  // ==========================================
+  const translations = {
+    ar: {
+      siteTitle: "هشام & وجدان", subtitle: "إدارة دعوات الزفاف",
+      groomTab: "قائمة العريس", brideTab: "قائمة العروس",
+      totalGuests: "إجمالي المدعوين", confirmed: "تم التأكيد",
+      notConfirmed: "لم يتم التأكيد", communicated: "تم التواصل",
+      notCommunicated: "لم يتم التواصل", totalChildren: "إجمالي الأطفال",
+      name: "الاسم", phone: "رقم الجوال", children: "الأطفال",
+      childrenCount: "عدد الأطفال", notes: "ملاحظات",
+      addGuest: "إضافة مدعو", deleteGuest: "حذف", edit: "تعديل",
+      save: "حفظ", cancel: "إلغاء",
+      confirmDelete: "هل أنت متأكد من حذف هذا المدعو؟",
+      importExcel: "استيراد من Excel", exportExcel: "تصدير إلى Excel",
+      search: "بحث...", yes: "نعم", no: "لا",
+      addChild: "إضافة طفل", childName: "اسم الطفل",
+      noGuests: "لا يوجد مدعوين حتى الآن",
+      days: "يوم", hours: "ساعة", minutes: "دقيقة", seconds: "ثانية",
+      weddingDay: "يوم الزفاف! 🎉",
+      importSuccess: "تم استيراد {count} مدعو بنجاح",
+      importError: "حدث خطأ أثناء الاستيراد",
+      requiredField: "هذا الحقل مطلوب",
+      loading: "جاري التحميل...",
+      connectionError: "خطأ في الاتصال بقاعدة البيانات. تحقق من اتصال الإنترنت.",
+    },
+    en: {
+      siteTitle: "Hesham & Wejdan", subtitle: "Wedding Invitation Manager",
+      groomTab: "Groom's List", brideTab: "Bride's List",
+      totalGuests: "Total Guests", confirmed: "Confirmed",
+      notConfirmed: "Not Confirmed", communicated: "Communicated",
+      notCommunicated: "Not Communicated", totalChildren: "Total Children",
+      name: "Name", phone: "Phone", children: "Children",
+      childrenCount: "Children", notes: "Notes",
+      addGuest: "Add Guest", deleteGuest: "Delete", edit: "Edit",
+      save: "Save", cancel: "Cancel",
+      confirmDelete: "Are you sure you want to delete this guest?",
+      importExcel: "Import Excel", exportExcel: "Export Excel",
+      search: "Search...", yes: "Yes", no: "No",
+      addChild: "Add Child", childName: "Child Name",
+      noGuests: "No guests yet",
+      days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds",
+      weddingDay: "Wedding Day! 🎉",
+      importSuccess: "Successfully imported {count} guests",
+      importError: "Error importing file",
+      requiredField: "This field is required",
+      loading: "Loading...",
+      connectionError: "Database connection error. Check your internet connection.",
+    },
+  };
+
+  let currentLang = localStorage.getItem("wedding-lang") || "ar";
+  function t(key) { return translations[currentLang]?.[key] || key; }
+  function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem("wedding-lang", lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }
+
+  // ==========================================
+  // FIREBASE
+  // ==========================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCn03i6YJcAdT3vWgghjybxiSsEnFv3ySk",
+    authDomain: "wedding-invitations-7129c.firebaseapp.com",
+    projectId: "wedding-invitations-7129c",
+    storageBucket: "wedding-invitations-7129c.firebasestorage.app",
+    messagingSenderId: "754604142124",
+    appId: "1:754604142124:web:8f74f5e0878f10d070ab89",
+  };
+
+  let db;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+  } catch (err) { console.error("Firebase init error:", err); }
+
+  function subscribeToGuests(collectionName, callback, onError) {
+    if (!db) { onError && onError(new Error("No DB")); return () => {}; }
+    return db.collection(collectionName).orderBy("createdAt", "desc").onSnapshot(
+      (snap) => { const g = []; snap.forEach(d => g.push({ id: d.id, ...d.data() })); callback(g); },
+      (err) => { console.error("Firestore:", err); onError && onError(err); }
+    );
+  }
+
+  async function addGuestDoc(col, data) {
+    return db.collection(col).add({
+      name: data.name || "", phone: data.phone || "",
+      confirmed: data.confirmed || false, communicated: data.communicated || false,
+      children: data.children || [], notes: data.notes || "",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+
+  async function deleteGuestDoc(col, id) { return db.collection(col).doc(id).delete(); }
+  async function updateGuestDoc(col, id, fields) { return db.collection(col).doc(id).update(fields); }
+
+  // ==========================================
+  // FALLING PETALS (full page, SVG-based)
+  // ==========================================
+  let petalsCanvas, petalsCtx, petals = [];
+  const petalImages = [];
+
+  // Create simple petal SVGs in different colors
+  function createSimplePetalSVG(color, accent) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 40 50">
+      <defs><radialGradient id="g" cx="40%" cy="30%" r="70%"><stop offset="0%" stop-color="${accent}"/><stop offset="100%" stop-color="${color}"/></radialGradient></defs>
+      <path d="M20 2 C28 8, 38 18, 38 30 C38 42, 28 48, 20 48 C12 48, 2 42, 2 30 C2 18, 12 8, 20 2Z" fill="url(#g)" opacity="0.85"/>
+      <path d="M20 6 C20 6, 20 44, 20 44" stroke="${accent}" stroke-width="0.5" opacity="0.3" fill="none"/>
+      <path d="M20 12 C14 20, 8 28, 10 36" stroke="${accent}" stroke-width="0.3" opacity="0.2" fill="none"/>
+      <path d="M20 12 C26 20, 32 28, 30 36" stroke="${accent}" stroke-width="0.3" opacity="0.2" fill="none"/>
+    </svg>`;
+    return "data:image/svg+xml;base64," + btoa(svg);
+  }
+
+  // User's flower SVG in different rose colors
+  function createFlowerSVG(fillColor) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1280 1279"><g transform="translate(0,1279) scale(0.1,-0.1)" fill="${fillColor}" stroke="none"><path d="M6154 12328 c-575 -955 -795 -1889 -649 -2754 82 -485 273 -951 578 -1409 69 -103 151 -218 178 -249 4 -5 22 8 39 28 22 24 41 36 59 36 14 0 40 13 57 28 83 72 318 475 434 745 158 371 250 767 264 1142 6 159 -7 514 -23 602 -6 32 -18 103 -27 158 -17 105 -64 308 -89 386 -8 26 -15 54 -15 63 0 8 -6 30 -14 48 -7 18 -23 65 -35 103 -13 39 -26 79 -31 90 -41 95 -50 120 -50 134 0 9 -7 25 -15 35 -8 11 -15 27 -15 36 0 9 -13 43 -30 75 -16 32 -30 64 -30 71 0 6 -7 17 -15 24 -8 7 -15 21 -15 31 0 9 -6 24 -14 31 -7 8 -17 29 -21 46 -3 18 -11 32 -16 32 -5 0 -9 6 -9 13 0 19 -40 91 -56 100 -8 4 -14 19 -14 33 0 13 -7 27 -15 30 -8 4 -12 10 -10 15 3 5 -3 16 -15 26 -11 10 -20 28 -20 41 0 12 -7 25 -15 28 -8 4 -15 14 -15 25 0 10 -11 35 -25 55 -14 20 -25 33 -25 28 0 -8 -24 27 -123 184 -26 39 -48 72 -50 72 -2 0 -52 -82 -113 -182z"/><path d="M10505 10753 c-1162 -268 -1954 -720 -2512 -1433 -106 -135 -237 -351 -333 -545 -140 -283 -221 -512 -290 -815 -31 -136 -84 -439 -78 -445 2 -2 37 1 78 6 41 5 104 7 140 3 73 -7 129 2 340 51 803 187 1460 609 1931 1240 154 205 243 354 374 620 144 292 267 621 345 925 33 126 35 154 19 211 -11 35 -2 124 18 175 5 14 2 15 -32 7z"/><path d="M2020 10713 c0 -21 56 -253 91 -373 232 -811 573 -1429 1048 -1900 496 -491 1119 -799 1891 -935 79 -14 161 -25 181 -25 34 0 38 3 45 33 10 44 6 94 -18 212 -11 55 -24 121 -28 148 -5 26 -14 62 -19 80 -6 17 -20 68 -31 112 -12 44 -26 94 -31 110 -6 17 -15 45 -19 64 -5 18 -13 38 -19 44 -6 6 -11 23 -11 38 0 15 -7 34 -15 43 -8 8 -15 25 -15 38 0 13 -7 33 -15 44 -8 10 -15 26 -15 34 0 8 -9 33 -20 55 -11 22 -19 46 -20 53 0 6 -4 12 -10 12 -5 0 -10 8 -10 18 0 9 -9 31 -20 47 -11 17 -20 37 -20 46 0 9 -7 19 -15 23 -8 3 -15 17 -15 31 0 14 -7 28 -15 31 -8 4 -15 14 -15 24 0 10 -7 20 -15 24 -8 3 -15 14 -15 25 0 11 -7 26 -15 35 -8 8 -15 19 -15 25 0 6 -4 11 -9 11 -9 0 -24 33 -26 53 0 4 -4 11 -10 15 -5 4 -28 34 -50 67 -262 395 -619 745 -1025 1002 -429 272 -974 490 -1557 622 -100 23 -123 25 -123 14z"/><path d="M9640 7303 c-614 -60 -1153 -265 -1720 -651 -74 -50 -150 -104 -169 -120 l-33 -29 113 -83 c478 -353 1021 -594 1544 -684 104 -18 331 -44 423 -48 34 -1 62 -6 62 -10 0 -11 179 -10 340 2 651 47 1215 231 1905 620 105 59 139 90 146 135 2 11 19 30 37 43 18 13 30 27 27 32 -8 14 -308 191 -450 266 -567 300 -1117 476 -1640 524 -101 9 -502 12 -585 3z"/><path d="M2405 7274 c-438 -46 -806 -142 -1220 -319 -245 -104 -634 -313 -834 -448 l-74 -49 74 -47 c163 -104 293 -179 474 -272 482 -248 936 -399 1395 -464 63 -9 124 -18 135 -20 11 -2 55 -4 98 -4 49 -1 76 -5 72 -11 -9 -15 398 -12 550 4 511 56 955 205 1415 476 259 153 333 213 343 279 2 13 14 31 27 41 l24 18 -24 21 c-14 11 -76 57 -138 102 -504 362 -1030 584 -1587 669 -112 18 -194 23 -415 25 -151 2 -293 1 -315 -1z"/><path d="M6151 7004 c-86 -23 -171 -74 -241 -144 -245 -245 -204 -635 86 -830 101 -67 168 -87 357 -106 275 -29 554 237 534 510 -6 88 -29 187 -44 193 -7 3 -13 18 -13 33 0 16 -4 30 -8 32 -5 2 -27 30 -49 63 -81 119 -196 207 -322 245 -76 24 -219 26 -300 4z"/><path d="M7326 5438 c148 -1074 637 -1908 1449 -2469 339 -235 711 -415 1165 -565 225 -75 639 -181 641 -166 6 43 -3 162 -16 208 -10 33 -24 79 -31 104 -7 25 -16 64 -20 88 -4 23 -10 42 -14 42 -4 0 -10 19 -14 42 -4 23 -10 47 -15 53 -4 5 -18 44 -30 85 -22 73 -30 93 -65 173 -9 21 -16 46 -16 55 0 10 -7 27 -15 38 -8 10 -15 27 -15 36 0 10 -9 34 -19 55 -37 72 -81 172 -81 183 0 5 -4 10 -9 10 -5 0 -12 14 -16 31 -4 17 -12 32 -19 35 -6 2 -13 16 -14 30 -1 14 -9 32 -17 40 -8 9 -15 24 -15 35 0 11 -7 22 -15 25 -8 4 -15 15 -15 25 0 11 -7 22 -15 25 -8 4 -15 14 -15 24 0 10 -7 25 -15 34 -8 8 -15 19 -15 25 0 5 -6 16 -12 23 -7 7 -24 35 -38 60 -13 26 -30 50 -37 52 -7 3 -13 15 -13 26 0 12 -4 18 -10 15 -5 -3 -12 6 -16 20 -3 14 -10 25 -14 25 -4 0 -28 31 -54 70 -147 219 -438 533 -651 704 -471 377 -1033 616 -1705 726 -69 11 -137 20 -153 20 -26 0 -27 -1 -21 -42z"/><path d="M5250 5463 c-14 -2 -88 -15 -164 -29 -1621 -296 -2625 -1360 -3022 -3202 -5 -27 -9 -27 112 -2 66 14 101 17 108 10 16 -16 47 -12 188 24 421 109 915 319 1269 539 837 519 1356 1288 1560 2310 21 106 20 177 -3 177 -10 0 -4 101 9 158 5 23 0 25 -57 15z"/><path d="M6268 4978 c-374 -500 -616 -1029 -712 -1558 -65 -356 -62 -801 9 -1183 98 -531 322 -1076 677 -1649 44 -70 82 -128 86 -128 4 0 18 16 31 35 13 20 26 33 29 31 2 -3 21 3 42 14 50 26 67 49 183 255 51 91 215 429 252 520 245 605 335 1100 306 1679 -6 122 -15 239 -20 261 -5 22 -14 72 -21 110 -13 84 -45 223 -65 285 -8 25 -15 57 -15 71 0 14 -7 34 -15 45 -8 10 -15 31 -15 45 0 14 -7 34 -15 45 -8 10 -15 28 -15 40 0 11 -7 29 -15 40 -8 10 -15 26 -15 35 0 21 -40 112 -52 120 -5 3 -9 9 -8 13 4 19 -14 76 -24 76 -6 0 -13 12 -14 28 -1 15 -9 32 -17 38 -8 6 -15 23 -15 38 0 16 -5 26 -15 26 -9 0 -15 9 -15 24 0 14 -6 31 -14 38 -7 8 -17 24 -20 36 -4 12 -12 22 -17 22 -5 0 -9 9 -9 19 0 11 -8 27 -17 37 -10 9 -18 24 -19 32 -2 9 -10 19 -18 24 -9 5 -16 20 -16 34 0 14 -4 23 -9 19 -5 -3 -13 5 -17 17 -4 13 -13 27 -20 33 -7 5 -14 16 -16 24 -2 7 -13 25 -26 40 -13 14 -26 38 -29 53 -3 15 -9 25 -14 23 -9 -6 -31 29 -24 39 3 3 2 4 -1 1 -4 -2 -45 47 -92 110 -47 63 -88 115 -92 115 -4 0 -32 -33 -62 -72z"/></g></svg>`;
+    return "data:image/svg+xml;base64," + btoa(svg);
+  }
+
+  const simplePetalVariants = [
+    { color: "#E8BFC4", accent: "#F5DFE2" },
+    { color: "#F0CDD2", accent: "#FAE8EB" },
+    { color: "#DCABAF", accent: "#F0D0D3" },
+    { color: "#D4969D", accent: "#EABEC3" },
+    { color: "#C98A92", accent: "#E5B5BB" },
+    { color: "#F2D8DB", accent: "#FDF0F2" },
+    { color: "#E0A5AC", accent: "#F5D0D5" },
+  ];
+
+  const flowerColors = ["#E8C4C8", "#D4A0A8", "#C98A92", "#F0CDD2", "#DCABAF"];
+
+  function loadPetalImages() {
+    const simplePromises = simplePetalVariants.map(v => new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve({ img, type: "simple" });
+      img.onerror = () => resolve(null);
+      img.src = createSimplePetalSVG(v.color, v.accent);
+    }));
+
+    const flowerPromises = flowerColors.map(c => new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve({ img, type: "flower" });
+      img.onerror = () => resolve(null);
+      img.src = createFlowerSVG(c);
+    }));
+
+    return Promise.all([...simplePromises, ...flowerPromises]);
+  }
+
+  class Petal {
+    constructor(w, h, simpleImgs, flowerImgs) {
+      this.cW = w; this.cH = h;
+      this.simpleImgs = simpleImgs;
+      this.flowerImgs = flowerImgs;
+      this.reset(true);
+    }
+    reset(init) {
+      this.x = Math.random() * this.cW;
+      this.y = init ? -Math.random() * this.cH : -40 - Math.random() * 100;
+      // 70% simple petals, 30% user's flower SVG
+      this.isFlower = Math.random() < 0.3 && this.flowerImgs.length > 0;
+      if (this.isFlower) {
+        this.img = this.flowerImgs[Math.floor(Math.random() * this.flowerImgs.length)];
+        this.size = Math.random() * 14 + 8;
+        this.rotSpeed = (Math.random() - 0.5) * 0.018;
+        this.opacity = Math.random() * 0.25 + 0.08;
+        this.speedY = Math.random() * 0.5 + 0.15;
+      } else {
+        this.img = this.simpleImgs[Math.floor(Math.random() * this.simpleImgs.length)];
+        this.size = Math.random() * 18 + 10;
+        this.rotSpeed = (Math.random() - 0.5) * 0.012;
+        this.opacity = Math.random() * 0.35 + 0.1;
+        this.speedY = Math.random() * 0.6 + 0.2;
+      }
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.rotation = Math.random() * Math.PI * 2;
+      this.wobble = Math.random() * Math.PI * 2;
+      this.wobbleSpeed = Math.random() * 0.015 + 0.005;
+      this.wobbleAmp = Math.random() * 0.6 + 0.2;
+      this.flipSpeed = Math.random() * 0.008 + 0.003;
+      this.flipPhase = Math.random() * Math.PI * 2;
+    }
+    update() {
+      this.y += this.speedY;
+      this.wobble += this.wobbleSpeed;
+      this.flipPhase += this.flipSpeed;
+      this.x += this.speedX + Math.sin(this.wobble) * this.wobbleAmp;
+      this.rotation += this.rotSpeed;
+      if (this.y > this.cH + 50) this.reset(false);
+    }
+    draw(ctx) {
+      if (!this.img) return;
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      const scaleX = this.isFlower ? 1 : (Math.cos(this.flipPhase) * 0.6 + 0.4);
+      ctx.scale(scaleX, 1);
+      ctx.globalAlpha = this.opacity;
+      if (this.isFlower) {
+        ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
+      } else {
+        ctx.drawImage(this.img, -this.size / 2, -this.size * 0.6, this.size, this.size * 1.2);
+      }
+      ctx.restore();
+    }
+  }
+
+  async function initPetals() {
+    petalsCanvas = document.getElementById("petals-canvas");
+    petalsCtx = petalsCanvas.getContext("2d");
+    resizePetals();
+    const allImgs = (await loadPetalImages()).filter(Boolean);
+    const simpleImgs = allImgs.filter(i => i.type === "simple").map(i => i.img);
+    const flowerImgs = allImgs.filter(i => i.type === "flower").map(i => i.img);
+    if (simpleImgs.length === 0 && flowerImgs.length === 0) return;
+    const count = Math.min(Math.floor(window.innerWidth * 0.035), 30);
+    for (let i = 0; i < count; i++) petals.push(new Petal(window.innerWidth, window.innerHeight, simpleImgs, flowerImgs));
+    window.addEventListener("resize", resizePetals);
+    animatePetals();
+  }
+
+  function resizePetals() {
+    const dpr = window.devicePixelRatio || 1;
+    petalsCanvas.width = window.innerWidth * dpr;
+    petalsCanvas.height = window.innerHeight * dpr;
+    petalsCanvas.style.width = window.innerWidth + "px";
+    petalsCanvas.style.height = window.innerHeight + "px";
+    petalsCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    petals.forEach(p => { p.cW = window.innerWidth; p.cH = window.innerHeight; });
+  }
+
+  function animatePetals() {
+    petalsCtx.clearRect(0, 0, petalsCanvas.width, petalsCanvas.height);
+    petals.forEach(p => { p.update(); p.draw(petalsCtx); });
+    requestAnimationFrame(animatePetals);
+  }
+
+  // ==========================================
+  // HEART + MONOGRAM ANIMATION
+  // ==========================================
+  let hCanvas, hCtx, hW = 0, hH = 0;
+  let animPhase = 0; // 0=drawing heart, 1=pulse, 2=fade+show initials
+  let animTime = 0;
+  let heartProgress = 0;
+  let heartPulse = 0;
+  let heartOpacity = 1;
+  let initialsOpacity = 0;
+  let initialsScale = 0.5;
+  const ROSE = "#B76E79", ROSE_LIGHT = "#E8C4C8", ROSE_DARK = "#8C4A52";
+
+  function getHeartPath(cx, cy, size) {
+    // Returns array of points forming a heart
+    const points = [];
+    for (let i = 0; i <= 360; i += 2) {
+      const rad = (i * Math.PI) / 180;
+      const x = cx + size * 16 * Math.pow(Math.sin(rad), 3) / 17;
+      const y = cy - size * (13 * Math.cos(rad) - 5 * Math.cos(2*rad) - 2 * Math.cos(3*rad) - Math.cos(4*rad)) / 17;
+      points.push({ x, y });
+    }
+    return points;
+  }
+
+  function initHeartAnimation() {
+    hCanvas = document.getElementById("monogram-canvas");
+    if (!hCanvas) return;
+    hCtx = hCanvas.getContext("2d");
+    resizeHeartCanvas();
+    window.addEventListener("resize", resizeHeartCanvas);
+    requestAnimationFrame(animateHeart);
+  }
+
+  function resizeHeartCanvas() {
+    const container = hCanvas.parentElement;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+    hW = rect.width;
+    hH = rect.height;
+    hCanvas.width = hW * dpr;
+    hCanvas.height = hH * dpr;
+    hCanvas.style.width = hW + "px";
+    hCanvas.style.height = hH + "px";
+    hCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function animateHeart(timestamp) {
+    animTime++;
+    hCtx.clearRect(0, 0, hCanvas.width, hCanvas.height);
+
+    const cx = hW / 2;
+    const cy = hH * 0.45;
+    const heartSize = Math.min(hW * 0.16, 70);
+    const points = getHeartPath(cx, cy, heartSize);
+
+    if (animPhase === 0) {
+      // Phase 0: Draw heart stroke progressively
+      heartProgress += 0.008;
+      const drawCount = Math.floor(points.length * Math.min(heartProgress, 1));
+
+      hCtx.save();
+      hCtx.strokeStyle = ROSE;
+      hCtx.lineWidth = 2.5;
+      hCtx.shadowColor = ROSE;
+      hCtx.shadowBlur = 12;
+      hCtx.lineCap = "round";
+      hCtx.lineJoin = "round";
+
+      if (drawCount > 1) {
+        hCtx.beginPath();
+        hCtx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < drawCount; i++) {
+          hCtx.lineTo(points[i].x, points[i].y);
+        }
+        hCtx.stroke();
+
+        // Glowing tip
+        const tip = points[drawCount - 1];
+        hCtx.beginPath();
+        hCtx.arc(tip.x, tip.y, 4, 0, Math.PI * 2);
+        hCtx.fillStyle = ROSE_LIGHT;
+        hCtx.shadowBlur = 20;
+        hCtx.fill();
+      }
+      hCtx.restore();
+
+      if (heartProgress >= 1.0) { animPhase = 1; heartPulse = 0; }
+    }
+
+    if (animPhase === 1) {
+      // Phase 1: Heart pulses twice
+      heartPulse += 0.03;
+      const scale = 1 + Math.sin(heartPulse * Math.PI) * 0.08;
+      const pulseOpacity = 1;
+
+      hCtx.save();
+      hCtx.translate(cx, cy);
+      hCtx.scale(scale, scale);
+      hCtx.translate(-cx, -cy);
+
+      hCtx.strokeStyle = ROSE;
+      hCtx.lineWidth = 2.5;
+      hCtx.shadowColor = ROSE;
+      hCtx.shadowBlur = 15 + Math.sin(heartPulse * Math.PI) * 10;
+      hCtx.globalAlpha = pulseOpacity;
+      hCtx.lineCap = "round";
+
+      hCtx.beginPath();
+      hCtx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) hCtx.lineTo(points[i].x, points[i].y);
+      hCtx.closePath();
+      hCtx.stroke();
+
+      // Soft fill
+      hCtx.fillStyle = "rgba(183, 110, 121, 0.06)";
+      hCtx.shadowBlur = 0;
+      hCtx.fill();
+
+      hCtx.restore();
+
+      if (heartPulse >= 2.0) { animPhase = 2; }
+    }
+
+    if (animPhase === 2) {
+      // Phase 2: Heart fades, initials appear
+      heartOpacity = Math.max(0, heartOpacity - 0.015);
+      initialsOpacity = Math.min(1, initialsOpacity + 0.012);
+      initialsScale = Math.min(1, initialsScale + 0.008);
+
+      // Fading heart
+      if (heartOpacity > 0) {
+        hCtx.save();
+        hCtx.globalAlpha = heartOpacity;
+        hCtx.strokeStyle = ROSE;
+        hCtx.lineWidth = 2;
+        hCtx.shadowColor = ROSE;
+        hCtx.shadowBlur = 8;
+        hCtx.beginPath();
+        hCtx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) hCtx.lineTo(points[i].x, points[i].y);
+        hCtx.closePath();
+        hCtx.stroke();
+        hCtx.restore();
+      }
+
+      // Rising initials
+      const isAr = currentLang === "ar";
+      const fontSize = Math.min(hW * 0.16, 90);
+      const eased = 1 - Math.pow(1 - Math.min(initialsScale, 1), 3);
+
+      hCtx.save();
+      hCtx.globalAlpha = initialsOpacity;
+      hCtx.translate(cx, cy);
+      hCtx.scale(eased, eased);
+      hCtx.translate(-cx, -cy);
+
+      const glow = 12 + Math.sin(animTime * 0.03) * 5;
+      hCtx.shadowColor = ROSE;
+      hCtx.shadowBlur = glow;
+      hCtx.font = `bold ${fontSize}px ${isAr ? "Tajawal" : "Playfair Display"}`;
+      hCtx.fillStyle = ROSE;
+      hCtx.textAlign = "center";
+      hCtx.textBaseline = "middle";
+
+      const spacing = Math.min(hW * 0.18, 110);
+      const l1 = isAr ? "ه" : "H";
+      const l2 = isAr ? "و" : "W";
+
+      hCtx.fillText(l1, cx - spacing, cy);
+      hCtx.fillText(l2, cx + spacing, cy);
+
+      // Ampersand
+      hCtx.font = `${fontSize * 0.45}px "Playfair Display"`;
+      hCtx.fillStyle = ROSE_LIGHT;
+      hCtx.shadowBlur = glow * 0.6;
+      hCtx.fillText("&", cx, cy);
+
+      // Names below
+      const nameOpacity = Math.max(0, (initialsOpacity - 0.5) * 2);
+      hCtx.globalAlpha = nameOpacity;
+      const ns = Math.min(hW * 0.04, 24);
+      hCtx.font = `${ns}px ${isAr ? "Tajawal" : "Playfair Display"}`;
+      hCtx.fillStyle = ROSE_DARK;
+      hCtx.shadowBlur = 0;
+      hCtx.fillText(isAr ? "هشام & وجدان" : "Hesham & Wejdan", cx, cy + fontSize * 0.65);
+
+      hCtx.restore();
+    }
+
+    // Continuous shimmer particles around the heart/initials area
+    if (animPhase >= 1) {
+      for (let i = 0; i < 2; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = heartSize * 14 / 17 + Math.random() * 20;
+        const px = cx + Math.cos(angle) * dist;
+        const py = cy + Math.sin(angle) * dist * 0.8;
+        hCtx.save();
+        hCtx.globalAlpha = Math.random() * 0.4 + 0.1;
+        hCtx.fillStyle = ROSE_LIGHT;
+        hCtx.shadowColor = ROSE;
+        hCtx.shadowBlur = 4;
+        hCtx.beginPath();
+        hCtx.arc(px, py, Math.random() * 2 + 0.5, 0, Math.PI * 2);
+        hCtx.fill();
+        hCtx.restore();
+      }
+    }
+
+    requestAnimationFrame(animateHeart);
+  }
+
+  // ==========================================
+  // APP STATE
+  // ==========================================
+  let currentTab = "groom_guests";
+  let groomGuests = [], brideGuests = [];
+  let searchQuery = "";
+  const WEDDING_DATE = new Date("2026-04-16T00:00:00");
+  const $ = (id) => document.getElementById(id);
+
+  // ==========================================
+  // CIRCULAR COUNTDOWN
+  // ==========================================
+  function updateCountdown() {
+    const el = $("countdown");
+    const diff = WEDDING_DATE - new Date();
+    if (diff <= 0) {
+      el.innerHTML = `<div class="wedding-day-msg">${t("weddingDay")}</div>`;
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff / 3600000) % 24);
+    const m = Math.floor((diff / 60000) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+
+    // Max values for ring fill calculation
+    const maxD = 365; // show proportion of a year
+    const items = [
+      { val: d, max: maxD, label: t("days") },
+      { val: h, max: 24, label: t("hours") },
+      { val: m, max: 60, label: t("minutes") },
+      { val: s, max: 60, label: t("seconds") },
+    ];
+
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
+
+    el.innerHTML = items.map(item => {
+      const pct = item.val / item.max;
+      const offset = circumference * (1 - pct);
+      return `
+        <div class="countdown-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="${radius}"/>
+            <circle class="ring-fill" cx="50" cy="50" r="${radius}"
+              stroke-dasharray="${circumference}"
+              stroke-dashoffset="${offset}"/>
+          </svg>
+          <div class="countdown-ring-content">
+            <span class="countdown-ring-number">${item.val}</span>
+            <span class="countdown-ring-label">${item.label}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ==========================================
+  // RENDERING
+  // ==========================================
+  function escapeHtml(str) { const d = document.createElement("div"); d.textContent = str || ""; return d.innerHTML; }
+  function escapeAttr(str) { return (str || "").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+  function getGuests() { return currentTab === "groom_guests" ? groomGuests : brideGuests; }
+
+  function renderSummary() {
+    const guests = getGuests();
+    const total = guests.length;
+    const confirmed = guests.filter(g => g.confirmed).length;
+    const communicated = guests.filter(g => g.communicated).length;
+    const totalChildren = guests.reduce((s, g) => s + (g.children?.length || 0), 0);
+    $("summary-cards").innerHTML = `
+      <div class="stat-chip default"><span class="stat-num">${total}</span><span class="stat-label">${t("totalGuests")}</span></div>
+      <div class="stat-chip green"><span class="stat-num">${confirmed}</span><span class="stat-label">${t("confirmed")}</span></div>
+      <div class="stat-chip red"><span class="stat-num">${total - confirmed}</span><span class="stat-label">${t("notConfirmed")}</span></div>
+      <div class="stat-chip blue"><span class="stat-num">${communicated}</span><span class="stat-label">${t("communicated")}</span></div>
+      <div class="stat-chip orange"><span class="stat-num">${total - communicated}</span><span class="stat-label">${t("notCommunicated")}</span></div>
+      <div class="stat-chip default"><span class="stat-num">${totalChildren}</span><span class="stat-label">${t("totalChildren")}</span></div>
+    `;
+  }
+
+  function renderTableHeaders() {
+    $("guest-table-head").innerHTML = `<tr>
+      <th></th><th>${t("name")}</th><th>${t("phone")}</th><th>${t("childrenCount")}</th>
+      <th>${t("communicated")}</th><th>${t("confirmed")}</th><th>${t("notes")}</th><th></th>
+    </tr>`;
+  }
+
+  function renderGuestTable() {
+    const guests = getGuests();
+    const filtered = searchQuery
+      ? guests.filter(g =>
+          g.name?.toLowerCase().includes(searchQuery) ||
+          g.phone?.includes(searchQuery) ||
+          g.notes?.toLowerCase().includes(searchQuery) ||
+          g.children?.some(c => c.name?.toLowerCase().includes(searchQuery))
+        )
+      : guests;
+
+    if (filtered.length === 0) {
+      $("guest-table-body").innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📋</div><p>${t("noGuests")}</p></div></td></tr>`;
+      return;
+    }
+
+    $("guest-table-body").innerHTML = filtered.map(g => `
+      <tr>
+        <td data-label=""><button class="expand-btn" onclick="toggleChildren('${g.id}')"><span id="expand-icon-${g.id}">▶</span></button></td>
+        <td data-label="${t("name")}"><strong>${escapeHtml(g.name)}</strong></td>
+        <td data-label="${t("phone")}">${escapeHtml(g.phone || "—")}</td>
+        <td data-label="${t("childrenCount")}"><span class="badge badge-blue">${g.children?.length || 0}</span></td>
+        <td data-label="${t("communicated")}"><label class="toggle"><input type="checkbox" ${g.communicated ? "checked" : ""} onchange="toggleField('${g.id}','communicated',this.checked)"><span class="toggle-slider"></span></label></td>
+        <td data-label="${t("confirmed")}"><label class="toggle"><input type="checkbox" ${g.confirmed ? "checked" : ""} onchange="toggleField('${g.id}','confirmed',this.checked)"><span class="toggle-slider"></span></label></td>
+        <td data-label="${t("notes")}"><span>${escapeHtml(g.notes || "—")}</span></td>
+        <td data-label="" class="actions-cell">
+          <button class="btn btn-outline btn-sm" onclick="openEditModal('${g.id}')">${t("edit")}</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDeleteGuest('${g.id}')">${t("deleteGuest")}</button>
+        </td>
+      </tr>
+      <tr class="children-row" id="children-row-${g.id}"><td colspan="8"><div class="children-container">
+        ${(g.children || []).map((c, i) => `<span class="child-chip">${escapeHtml(c.name)}<button class="remove-child" onclick="removeChild('${g.id}',${i})">&times;</button></span>`).join("")}
+        <div class="add-child-inline"><input type="text" id="new-child-${g.id}" placeholder="${t("childName")}" onkeydown="if(event.key==='Enter')addChild('${g.id}')"><button class="btn btn-gold btn-sm" onclick="addChild('${g.id}')">+</button></div>
+      </div></td></tr>
+    `).join("");
+  }
+
+  function renderAll() {
+    $("lang-toggle").textContent = currentLang === "ar" ? "EN" : "AR";
+    $("groom-tab").textContent = t("groomTab");
+    $("bride-tab").textContent = t("brideTab");
+    $("search-input").placeholder = t("search");
+    $("add-guest-btn").innerHTML = `<span>+</span> ${t("addGuest")}`;
+    $("import-btn").textContent = t("importExcel");
+    $("export-btn").textContent = t("exportExcel");
+    renderTableHeaders(); renderSummary(); renderGuestTable(); updateCountdown();
+  }
+
+  // ==========================================
+  // ACTIONS
+  // ==========================================
+  function switchTab(tab) {
+    currentTab = tab;
+    $("groom-tab").classList.toggle("active", tab === "groom_guests");
+    $("bride-tab").classList.toggle("active", tab === "bride_guests");
+    renderSummary(); renderGuestTable();
+  }
+
+  function toggleChildren(id) {
+    const row = $("children-row-" + id);
+    const icon = $("expand-icon-" + id);
+    if (row) { row.classList.toggle("open"); icon.textContent = row.classList.contains("open") ? "▼" : "▶"; }
+  }
+
+  async function toggleField(id, field, value) {
+    try { await updateGuestDoc(currentTab, id, { [field]: value }); }
+    catch (err) { showToast(err.message, "error"); }
+  }
+
+  async function addChild(guestId) {
+    const input = $("new-child-" + guestId);
+    const name = input?.value.trim();
+    if (!name) return;
+    const guest = getGuests().find(g => g.id === guestId);
+    if (!guest) return;
+    try { await updateGuestDoc(currentTab, guestId, { children: [...(guest.children || []), { name }] }); input.value = ""; }
+    catch (err) { showToast(err.message, "error"); }
+  }
+
+  async function removeChild(guestId, idx) {
+    const guest = getGuests().find(g => g.id === guestId);
+    if (!guest) return;
+    try { await updateGuestDoc(currentTab, guestId, { children: (guest.children || []).filter((_, i) => i !== idx) }); }
+    catch (err) { showToast(err.message, "error"); }
+  }
+
+  // ==========================================
+  // MODAL
+  // ==========================================
+  function openAddModal() {
+    $("modal-content").innerHTML = `
+      <h2>${t("addGuest")}</h2>
+      <div class="form-group"><label>${t("name")} *</label><input type="text" id="modal-name"></div>
+      <div class="form-group"><label>${t("phone")}</label><input type="text" id="modal-phone"></div>
+      <div class="form-group"><label>${t("notes")}</label><textarea id="modal-notes"></textarea></div>
+      <div class="form-group"><label>${t("children")}</label><div class="form-children" id="modal-children"></div>
+        <div class="add-child-inline" style="margin-top:8px"><input type="text" id="modal-child-input" placeholder="${t("childName")}" onkeydown="if(event.key==='Enter'){event.preventDefault();addModalChild()}"><button type="button" class="btn btn-gold btn-sm" onclick="addModalChild()">+</button></div></div>
+      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">${t("cancel")}</button><button class="btn btn-gold" onclick="saveNewGuest()">${t("save")}</button></div>
+    `;
+    $("modal-overlay").classList.add("active");
+    setTimeout(() => $("modal-name")?.focus(), 100);
+  }
+
+  function openEditModal(guestId) {
+    const guest = getGuests().find(g => g.id === guestId);
+    if (!guest) return;
+    $("modal-content").innerHTML = `
+      <h2>${t("edit")}</h2>
+      <div class="form-group"><label>${t("name")} *</label><input type="text" id="modal-name" value="${escapeAttr(guest.name)}"></div>
+      <div class="form-group"><label>${t("phone")}</label><input type="text" id="modal-phone" value="${escapeAttr(guest.phone || "")}"></div>
+      <div class="form-group"><label>${t("notes")}</label><textarea id="modal-notes">${escapeHtml(guest.notes || "")}</textarea></div>
+      <div class="form-group"><label>${t("children")}</label><div class="form-children" id="modal-children">
+        ${(guest.children || []).map(c => `<span class="child-chip">${escapeHtml(c.name)}<button class="remove-child" onclick="this.parentElement.remove()">&times;</button></span>`).join("")}
+      </div><div class="add-child-inline" style="margin-top:8px"><input type="text" id="modal-child-input" placeholder="${t("childName")}" onkeydown="if(event.key==='Enter'){event.preventDefault();addModalChild()}"><button type="button" class="btn btn-gold btn-sm" onclick="addModalChild()">+</button></div></div>
+      <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">${t("cancel")}</button><button class="btn btn-gold" onclick="saveEditGuest('${guestId}')">${t("save")}</button></div>
+    `;
+    $("modal-overlay").classList.add("active");
+    setTimeout(() => $("modal-name")?.focus(), 100);
+  }
+
+  function addModalChild() {
+    const input = $("modal-child-input");
+    const name = input?.value.trim();
+    if (!name) return;
+    const chip = document.createElement("span");
+    chip.className = "child-chip";
+    chip.innerHTML = `${escapeHtml(name)}<button class="remove-child" onclick="this.parentElement.remove()">&times;</button>`;
+    $("modal-children").appendChild(chip);
+    input.value = ""; input.focus();
+  }
+
+  function getModalChildren() {
+    return Array.from(document.querySelectorAll("#modal-children .child-chip")).map(chip => ({ name: chip.firstChild.textContent.trim() }));
+  }
+
+  async function saveNewGuest() {
+    const name = $("modal-name")?.value.trim();
+    if (!name) { showToast(t("requiredField"), "error"); return; }
+    try {
+      await addGuestDoc(currentTab, { name, phone: $("modal-phone")?.value.trim() || "", notes: $("modal-notes")?.value.trim() || "", children: getModalChildren() });
+      closeModal();
+    } catch (err) { showToast(err.message, "error"); }
+  }
+
+  async function saveEditGuest(guestId) {
+    const name = $("modal-name")?.value.trim();
+    if (!name) { showToast(t("requiredField"), "error"); return; }
+    try {
+      await updateGuestDoc(currentTab, guestId, { name, phone: $("modal-phone")?.value.trim() || "", notes: $("modal-notes")?.value.trim() || "", children: getModalChildren() });
+      closeModal();
+    } catch (err) { showToast(err.message, "error"); }
+  }
+
+  function closeModal() { $("modal-overlay").classList.remove("active"); }
+
+  // ==========================================
+  // CONFIRM DELETE
+  // ==========================================
+  let pendingDeleteId = null;
+
+  function confirmDeleteGuest(id) {
+    pendingDeleteId = id;
+    $("confirm-message").textContent = t("confirmDelete");
+    $("confirm-yes").textContent = t("yes");
+    $("confirm-no").textContent = t("cancel");
+    $("confirm-overlay").classList.add("active");
+  }
+
+  function closeConfirm() { pendingDeleteId = null; $("confirm-overlay").classList.remove("active"); }
+
+  // ==========================================
+  // EXCEL
+  // ==========================================
+  function parseBool(val) {
+    if (typeof val === "boolean") return val;
+    if (typeof val === "string") { const v = val.trim().toLowerCase(); return v === "yes" || v === "نعم" || v === "true" || v === "1"; }
+    return false;
+  }
+
+  function handleExport() {
+    const guests = getGuests();
+    const isAr = currentLang === "ar";
+    const headers = isAr ? ["الاسم","رقم الجوال","تم التواصل","تم التأكيد","الأطفال","ملاحظات"] : ["Name","Phone","Communicated","Confirmed","Children","Notes"];
+    const yesNo = (v) => v ? t("yes") : t("no");
+    const rows = guests.map(g => [g.name||"",g.phone||"",yesNo(g.communicated),yesNo(g.confirmed),(g.children||[]).map(c=>c.name).join(", "),g.notes||""]);
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws["!cols"] = headers.map((h,i) => ({ wch: Math.min(Math.max(h.length, ...rows.map(r => String(r[i]).length)) + 4, 40) }));
+    const sheetName = currentTab === "groom_guests" ? (isAr ? "قائمة_العريس" : "Groom_Guests") : (isAr ? "قائمة_العروس" : "Bride_Guests");
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    XLSX.writeFile(wb, `${sheetName}.xlsx`);
+  }
+
+  async function handleImport(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, { type: "array" });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+      const guests = rows.map(row => ({
+        name: row["الاسم"]||row["Name"]||row["name"]||"",
+        phone: String(row["رقم الجوال"]||row["Phone"]||row["phone"]||""),
+        communicated: parseBool(row["تم التواصل"]||row["Communicated"]||row["communicated"]),
+        confirmed: parseBool(row["تم التأكيد"]||row["Confirmed"]||row["confirmed"]),
+        children: (row["الأطفال"]||row["Children"]||row["children"]||"").toString().split(",").map(s=>s.trim()).filter(Boolean).map(name=>({name})),
+        notes: row["ملاحظات"]||row["Notes"]||row["notes"]||"",
+      }));
+      await Promise.all(guests.map(g => addGuestDoc(currentTab, g)));
+      showToast(t("importSuccess").replace("{count}", guests.length), "success");
+    } catch (err) { console.error(err); showToast(t("importError"), "error"); }
+    $("file-input").value = "";
+  }
+
+  // ==========================================
+  // TOAST
+  // ==========================================
+  function showToast(message, type) {
+    const toast = document.createElement("div");
+    toast.className = `toast ${type || ""}`;
+    toast.textContent = message;
+    $("toast-container").appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  // ==========================================
+  // INIT
+  // ==========================================
+  function init() {
+    setLanguage(currentLang);
+    initPetals();
+    initHeartAnimation();
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    $("lang-toggle").addEventListener("click", () => {
+      currentLang = currentLang === "ar" ? "en" : "ar";
+      setLanguage(currentLang);
+      // Reset heart animation for language change
+      animPhase = 2; heartOpacity = 0; initialsOpacity = 0; initialsScale = 0.5;
+      renderAll();
+    });
+
+    $("groom-tab").addEventListener("click", () => switchTab("groom_guests"));
+    $("bride-tab").addEventListener("click", () => switchTab("bride_guests"));
+    $("search-input").addEventListener("input", (e) => { searchQuery = e.target.value.toLowerCase(); renderGuestTable(); });
+    $("add-guest-btn").addEventListener("click", openAddModal);
+    $("import-btn").addEventListener("click", () => $("file-input").click());
+    $("export-btn").addEventListener("click", handleExport);
+    $("file-input").addEventListener("change", handleImport);
+    $("modal-overlay").addEventListener("click", (e) => { if (e.target === $("modal-overlay")) closeModal(); });
+    $("confirm-overlay").addEventListener("click", (e) => { if (e.target === $("confirm-overlay")) closeConfirm(); });
+    $("confirm-yes").addEventListener("click", async () => {
+      if (pendingDeleteId) { try { await deleteGuestDoc(currentTab, pendingDeleteId); } catch (err) { showToast(err.message, "error"); } }
+      closeConfirm();
+    });
+    $("confirm-no").addEventListener("click", closeConfirm);
+
+    function onFirestoreError(err) {
+      console.error(err);
+      $("error-banner").textContent = t("connectionError") + " (" + err.message + ")";
+      $("error-banner").classList.add("show");
+      renderGuestTable();
+    }
+
+    subscribeToGuests("groom_guests", (guests) => { groomGuests = guests; if (currentTab === "groom_guests") { renderSummary(); renderGuestTable(); } }, onFirestoreError);
+    subscribeToGuests("bride_guests", (guests) => { brideGuests = guests; if (currentTab === "bride_guests") { renderSummary(); renderGuestTable(); } }, onFirestoreError);
+
+    renderAll();
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+  </script>
+</body>
+</html>
