@@ -603,6 +603,9 @@
 
     .error-banner.show { display: block; }
 
+    /* ===== MOBILE CARD VIEW ===== */
+    .mobile-cards { display: none; }
+
     @media (max-width: 768px) {
       .hero { padding: 25px 12px 0; }
       .canvas-container { height: 180px; }
@@ -618,49 +621,132 @@
       .stat-chip { padding: 4px 10px; font-size: 11px; }
       .stat-chip .stat-num { font-size: 14px; }
 
-      .table-wrapper { background: none; box-shadow: none; }
-      .guest-table, .guest-table thead, .guest-table tbody,
-      .guest-table th, .guest-table td, .guest-table tr { display: block; }
-      .guest-table thead { display: none; }
-
-      .guest-table tr {
-        background: var(--white);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        margin-bottom: 12px;
-        padding: 16px;
-      }
-
-      .guest-table td {
-        padding: 6px 0;
-        border-bottom: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .guest-table td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        font-size: 12px;
-        color: var(--gold-dark);
-        min-width: 100px;
-      }
-
-      .guest-table tr:hover td { background: none; }
-      .children-row td { padding: 10px 0; }
-      .children-row td::before { display: none; }
+      .table-wrapper { display: none; }
+      .mobile-cards { display: block; }
       .modal { padding: 24px 20px; max-height: 85vh; }
+    }
 
-      .actions-cell {
-        justify-content: flex-end !important;
-        gap: 6px;
-        padding-top: 10px !important;
-        border-top: 1px solid #f5eded !important;
-        margin-top: 6px;
-      }
+    .guest-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 10px;
+      overflow: hidden;
+      border: 1px solid #f5eded;
+    }
 
-      .actions-cell::before { display: none !important; }
+    .guest-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      gap: 8px;
+    }
+
+    .guest-card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--charcoal);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .guest-card-badges {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .guest-card-body {
+      padding: 0 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .guest-card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .guest-card-label {
+      color: var(--gray);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .guest-card-value {
+      color: var(--charcoal);
+      font-size: 13px;
+    }
+
+    .guest-card-toggles {
+      display: flex;
+      gap: 16px;
+      padding: 8px 0;
+    }
+
+    .guest-card-toggle-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--gray);
+    }
+
+    .guest-card-notes {
+      font-size: 12px;
+      color: var(--gray);
+      font-style: italic;
+      padding: 4px 0;
+      border-top: 1px solid #f9f3f3;
+    }
+
+    .guest-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--gray-light);
+      border-top: 1px solid #f5eded;
+    }
+
+    .guest-card-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .guest-card-children {
+      padding: 8px 14px 10px;
+      background: var(--gray-light);
+      border-top: 1px solid #f5eded;
+    }
+
+    .guest-card-expand {
+      background: none;
+      border: none;
+      color: var(--gold);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .guest-card-children-content {
+      display: none;
+    }
+
+    .guest-card-children-content.open {
+      display: block;
     }
 
     @media (max-width: 400px) {
@@ -723,6 +809,9 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Mobile Card View -->
+    <div class="mobile-cards" id="mobile-cards"></div>
 
     <div style="height:20px"></div>
   </div>
@@ -1302,11 +1391,15 @@
         )
       : guests;
 
+    const emptyHtml = `<div class="empty-state"><div class="empty-state-icon">📋</div><p>${t("noGuests")}</p></div>`;
+
     if (filtered.length === 0) {
-      $("guest-table-body").innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📋</div><p>${t("noGuests")}</p></div></td></tr>`;
+      $("guest-table-body").innerHTML = `<tr><td colspan="8">${emptyHtml}</td></tr>`;
+      $("mobile-cards").innerHTML = emptyHtml;
       return;
     }
 
+    // Desktop table
     $("guest-table-body").innerHTML = filtered.map(g => `
       <tr>
         <td data-label=""><button class="expand-btn" onclick="toggleChildren('${g.id}')"><span id="expand-icon-${g.id}">▶</span></button></td>
@@ -1326,6 +1419,54 @@
         <div class="add-child-inline"><input type="text" id="new-child-${g.id}" placeholder="${t("childName")}" onkeydown="if(event.key==='Enter')addChild('${g.id}')"><button class="btn btn-gold btn-sm" onclick="addChild('${g.id}')">+</button></div>
       </div></td></tr>
     `).join("");
+
+    // Mobile cards
+    $("mobile-cards").innerHTML = filtered.map(g => {
+      const childCount = g.children?.length || 0;
+      const commBadge = g.communicated
+        ? `<span class="badge badge-blue">${t("communicated")}</span>`
+        : `<span class="badge badge-orange">${t("notCommunicated")}</span>`;
+      const confBadge = g.confirmed
+        ? `<span class="badge badge-green">${t("confirmed")}</span>`
+        : `<span class="badge badge-red">${t("notConfirmed")}</span>`;
+
+      return `<div class="guest-card">
+        <div class="guest-card-header">
+          <span class="guest-card-name">${escapeHtml(g.name)}</span>
+          <div class="guest-card-badges">${confBadge}${commBadge}</div>
+        </div>
+        <div class="guest-card-body">
+          ${g.phone ? `<div class="guest-card-row"><span class="guest-card-label">${t("phone")}</span><span class="guest-card-value">${escapeHtml(g.phone)}</span></div>` : ""}
+          <div class="guest-card-toggles">
+            <label class="guest-card-toggle-item">
+              <label class="toggle"><input type="checkbox" ${g.confirmed ? "checked" : ""} onchange="toggleField('${g.id}','confirmed',this.checked)"><span class="toggle-slider"></span></label>
+              ${t("confirmed")}
+            </label>
+            <label class="guest-card-toggle-item">
+              <label class="toggle"><input type="checkbox" ${g.communicated ? "checked" : ""} onchange="toggleField('${g.id}','communicated',this.checked)"><span class="toggle-slider"></span></label>
+              ${t("communicated")}
+            </label>
+          </div>
+          ${g.notes ? `<div class="guest-card-notes">${escapeHtml(g.notes)}</div>` : ""}
+        </div>
+        <div class="guest-card-footer">
+          <button class="guest-card-expand" onclick="toggleMobileChildren('${g.id}')">
+            ${childCount > 0 ? `${t("children")} (${childCount})` : t("addChild")}
+            <span id="m-expand-${g.id}">▼</span>
+          </button>
+          <div class="guest-card-actions">
+            <button class="btn btn-outline btn-sm" onclick="openEditModal('${g.id}')">${t("edit")}</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteGuest('${g.id}')">${t("deleteGuest")}</button>
+          </div>
+        </div>
+        <div class="guest-card-children-content" id="m-children-${g.id}">
+          <div class="guest-card-children"><div class="children-container">
+            ${(g.children || []).map((c, i) => `<span class="child-chip">${escapeHtml(c.name)}<button class="remove-child" onclick="removeChild('${g.id}',${i})">&times;</button></span>`).join("")}
+            <div class="add-child-inline"><input type="text" id="m-new-child-${g.id}" placeholder="${t("childName")}" onkeydown="if(event.key==='Enter')addMobileChild('${g.id}')"><button class="btn btn-gold btn-sm" onclick="addMobileChild('${g.id}')">+</button></div>
+          </div></div>
+        </div>
+      </div>`;
+    }).join("");
   }
 
   function renderAll() {
@@ -1353,6 +1494,22 @@
     const row = $("children-row-" + id);
     const icon = $("expand-icon-" + id);
     if (row) { row.classList.toggle("open"); icon.textContent = row.classList.contains("open") ? "▼" : "▶"; }
+  }
+
+  function toggleMobileChildren(id) {
+    const el = $("m-children-" + id);
+    const icon = $("m-expand-" + id);
+    if (el) { el.classList.toggle("open"); icon.textContent = el.classList.contains("open") ? "▲" : "▼"; }
+  }
+
+  async function addMobileChild(guestId) {
+    const input = $("m-new-child-" + guestId);
+    const name = input?.value.trim();
+    if (!name) return;
+    const guest = getGuests().find(g => g.id === guestId);
+    if (!guest) return;
+    try { await updateGuestDoc(currentTab, guestId, { children: [...(guest.children || []), { name }] }); input.value = ""; }
+    catch (err) { showToast(err.message, "error"); }
   }
 
   async function toggleField(id, field, value) {
