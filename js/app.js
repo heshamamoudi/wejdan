@@ -261,7 +261,7 @@ function renderGuestTable() {
       <td data-label="${t("name")}">
         <strong>${escapeHtml(guest.name)}</strong>
       </td>
-      <td data-label="${t("phone")}">${escapeHtml(guest.phone || "—")}</td>
+      <td data-label="${t("phone")}">${guest.phone ? `<a href="tel:+966${guest.phone}" style="color:inherit;text-decoration:none">${escapeHtml(guest.phone)}</a>` : "—"}</td>
       <td data-label="${t("childrenCount")}">
         <span class="badge badge-blue">${guest.children?.length || 0}</span>
       </td>

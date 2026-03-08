@@ -1465,7 +1465,7 @@
       <tr>
         <td data-label=""><button class="expand-btn" onclick="toggleChildren('${g.id}')"><span id="expand-icon-${g.id}">▶</span></button></td>
         <td data-label="${t("name")}"><strong>${escapeHtml(g.name)}</strong></td>
-        <td data-label="${t("phone")}">${escapeHtml(g.phone || "—")}</td>
+        <td data-label="${t("phone")}">${g.phone ? `<a href="tel:+966${g.phone}" style="color:inherit;text-decoration:none">${escapeHtml(g.phone)}</a>` : "—"}</td>
         <td data-label="${t("childrenCount")}"><span class="badge badge-blue">${g.children?.length || 0}</span></td>
         <td data-label="${t("communicated")}"><label class="toggle"><input type="checkbox" ${g.communicated ? "checked" : ""} onchange="toggleField('${g.id}','communicated',this.checked)"><span class="toggle-slider"></span></label></td>
         <td data-label="${t("confirmed")}"><label class="toggle"><input type="checkbox" ${g.confirmed ? "checked" : ""} onchange="toggleField('${g.id}','confirmed',this.checked)"><span class="toggle-slider"></span></label></td>
@@ -1497,7 +1497,7 @@
           <div class="guest-card-badges">${confBadge}${commBadge}</div>
         </div>
         <div class="guest-card-body">
-          ${g.phone ? `<div class="guest-card-row"><span class="guest-card-label">${t("phone")}</span><span class="guest-card-value">${escapeHtml(g.phone)}</span></div>` : ""}
+          ${g.phone ? `<div class="guest-card-row"><span class="guest-card-label">${t("phone")}</span><span class="guest-card-value"><a href="tel:+966${g.phone}" style="color:inherit;text-decoration:none">${escapeHtml(g.phone)}</a></span></div>` : ""}
           <div class="guest-card-toggles">
             <label class="guest-card-toggle-item">
               <label class="toggle"><input type="checkbox" ${g.confirmed ? "checked" : ""} onchange="toggleField('${g.id}','confirmed',this.checked)"><span class="toggle-slider"></span></label>
