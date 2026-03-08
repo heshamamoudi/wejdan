@@ -64,8 +64,8 @@ function drawMonogram(time) {
   const h = canvas.drawHeight;
   const isArabic = getLang() === "ar";
 
-  const letterLeft = isArabic ? "ه" : "H";
-  const letterRight = isArabic ? "و" : "W";
+  const letterLeft = isArabic ? "و" : "H";
+  const letterRight = isArabic ? "ه" : "W";
 
   const fontSize = Math.min(w * 0.18, 120);
   const ampSize = fontSize * 0.5;

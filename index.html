@@ -757,6 +757,53 @@
       .stat-chip .stat-num { font-size: 13px; }
       .stat-chip .stat-label { font-size: 10px; }
     }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 0;
+      flex-wrap: wrap;
+    }
+    .pagination button {
+      min-width: 36px;
+      height: 36px;
+      border: 1px solid #e0d5d0;
+      background: var(--white);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--charcoal);
+      transition: all 0.2s;
+    }
+    .pagination button:hover { background: var(--cream); }
+    .pagination button.active {
+      background: var(--gold);
+      color: var(--white);
+      border-color: var(--gold);
+      font-weight: 700;
+    }
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .pagination .page-info {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 4px;
+    }
+    .pagination select {
+      height: 36px;
+      border: 1px solid #e0d5d0;
+      border-radius: 8px;
+      padding: 0 8px;
+      font-size: 13px;
+      background: var(--white);
+      color: var(--charcoal);
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -813,6 +860,9 @@
 
     <!-- Mobile Card View -->
     <div class="mobile-cards" id="mobile-cards"></div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
 
     <div style="height:20px"></div>
   </div>
@@ -1249,8 +1299,8 @@
       hCtx.textBaseline = "middle";
 
       const spacing = Math.min(hW * 0.18, 110);
-      const l1 = isAr ? "ه" : "H";
-      const l2 = isAr ? "و" : "W";
+      const l1 = isAr ? "و" : "H";
+      const l2 = isAr ? "ه" : "W";
 
       hCtx.fillText(l1, cx - spacing, cy);
       hCtx.fillText(l2, cx + spacing, cy);
@@ -1301,6 +1351,8 @@
   let currentTab = "groom_guests";
   let groomGuests = [], brideGuests = [];
   let searchQuery = "";
+  let currentPage = 1;
+  let pageSize = 10;
   const WEDDING_DATE = new Date("2026-04-16T00:00:00");
   const $ = (id) => document.getElementById(id);
 
@@ -1395,11 +1447,21 @@
     if (filtered.length === 0) {
       $("guest-table-body").innerHTML = `<tr><td colspan="8">${emptyHtml}</td></tr>`;
       $("mobile-cards").innerHTML = emptyHtml;
+      $("pagination").innerHTML = "";
       return;
     }
 
+    // Pagination
+    const totalPages = Math.ceil(filtered.length / pageSize);
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    const start = (currentPage - 1) * pageSize;
+    const paged = filtered.slice(start, start + pageSize);
+
+    renderPagination(filtered.length, totalPages);
+
     // Desktop table
-    $("guest-table-body").innerHTML = filtered.map(g => `
+    $("guest-table-body").innerHTML = paged.map(g => `
       <tr>
         <td data-label=""><button class="expand-btn" onclick="toggleChildren('${g.id}')"><span id="expand-icon-${g.id}">▶</span></button></td>
         <td data-label="${t("name")}"><strong>${escapeHtml(g.name)}</strong></td>
@@ -1420,7 +1482,7 @@
     `).join("");
 
     // Mobile cards
-    $("mobile-cards").innerHTML = filtered.map(g => {
+    $("mobile-cards").innerHTML = paged.map(g => {
       const childCount = g.children?.length || 0;
       const commBadge = g.communicated
         ? `<span class="badge badge-blue">${t("communicated")}</span>`
@@ -1468,6 +1530,52 @@
     }).join("");
   }
 
+  function renderPagination(totalItems, totalPages) {
+    const isAr = currentLang === "ar";
+    const prevLabel = isAr ? "السابق" : "Prev";
+    const nextLabel = isAr ? "التالي" : "Next";
+
+    let html = "";
+
+    // Page size selector
+    html += `<select onchange="pageSize=Number(this.value);currentPage=1;renderGuestTable()">`;
+    [10, 25, 50, 100].forEach(s => {
+      html += `<option value="${s}" ${pageSize === s ? "selected" : ""}>${s}</option>`;
+    });
+    html += `</select>`;
+
+    // Prev button
+    html += `<button ${currentPage <= 1 ? "disabled" : ""} onclick="currentPage--;renderGuestTable()">${prevLabel}</button>`;
+
+    // Page buttons
+    const maxButtons = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+
+    if (startPage > 1) {
+      html += `<button onclick="currentPage=1;renderGuestTable()">1</button>`;
+      if (startPage > 2) html += `<span class="page-info">...</span>`;
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      html += `<button class="${i === currentPage ? "active" : ""}" onclick="currentPage=${i};renderGuestTable()">${i}</button>`;
+    }
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) html += `<span class="page-info">...</span>`;
+      html += `<button onclick="currentPage=${totalPages};renderGuestTable()">${totalPages}</button>`;
+    }
+
+    // Next button
+    html += `<button ${currentPage >= totalPages ? "disabled" : ""} onclick="currentPage++;renderGuestTable()">${nextLabel}</button>`;
+
+    // Info
+    const from = (currentPage - 1) * pageSize + 1;
+    const to = Math.min(currentPage * pageSize, totalItems);
+    html += `<span class="page-info">${from}-${to} / ${totalItems}</span>`;
+
+    $("pagination").innerHTML = html;
+  }
+
   function renderAll() {
     $("lang-toggle").textContent = currentLang === "ar" ? "EN" : "AR";
     $("groom-tab").textContent = t("groomTab");
@@ -1485,6 +1593,7 @@
   // ==========================================
   function switchTab(tab) {
     currentTab = tab;
+    currentPage = 1;
     $("groom-tab").classList.toggle("active", tab === "groom_guests");
     $("bride-tab").classList.toggle("active", tab === "bride_guests");
     renderSummary(); renderGuestTable();
@@ -1709,7 +1818,7 @@
 
     $("groom-tab").addEventListener("click", () => switchTab("groom_guests"));
     $("bride-tab").addEventListener("click", () => switchTab("bride_guests"));
-    $("search-input").addEventListener("input", (e) => { searchQuery = e.target.value.toLowerCase(); renderGuestTable(); });
+    $("search-input").addEventListener("input", (e) => { searchQuery = e.target.value.toLowerCase(); currentPage = 1; renderGuestTable(); });
     $("add-guest-btn").addEventListener("click", openAddModal);
     $("import-btn").addEventListener("click", () => $("file-input").click());
     $("export-btn").addEventListener("click", handleExport);

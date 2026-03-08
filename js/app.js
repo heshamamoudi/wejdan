@@ -16,6 +16,8 @@ let currentTab = "groom_guests";
 let groomGuests = [];
 let brideGuests = [];
 let searchQuery = "";
+let currentPage = 1;
+let pageSize = 10;
 let unsubGroom = null;
 let unsubBride = null;
 
@@ -64,6 +66,7 @@ function setupEventListeners() {
 
   searchInput.addEventListener("input", (e) => {
     searchQuery = e.target.value.toLowerCase();
+    currentPage = 1;
     renderGuestTable();
   });
 
@@ -106,6 +109,7 @@ function subscribeToData() {
 // ===== TAB SWITCHING =====
 function switchTab(tab) {
   currentTab = tab;
+  currentPage = 1;
   groomTabBtn.classList.toggle("active", tab === "groom_guests");
   brideTabBtn.classList.toggle("active", tab === "bride_guests");
   renderSummary();
@@ -232,10 +236,20 @@ function renderGuestTable() {
         </td>
       </tr>
     `;
+    document.getElementById("pagination").innerHTML = "";
     return;
   }
 
-  guestTableBody.innerHTML = filtered
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  const start = (currentPage - 1) * pageSize;
+  const paged = filtered.slice(start, start + pageSize);
+
+  renderPagination(filtered.length, totalPages);
+
+  guestTableBody.innerHTML = paged
     .map(
       (guest) => `
     <tr>
@@ -577,6 +591,59 @@ function escapeAttr(str) {
   return str.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
+// ===== PAGINATION =====
+function renderPagination(totalItems, totalPages) {
+  const isAr = getLang() === "ar";
+  const prevLabel = isAr ? "السابق" : "Prev";
+  const nextLabel = isAr ? "التالي" : "Next";
+
+  let html = "";
+
+  html += `<select onchange="window.app.setPageSize(Number(this.value))">`;
+  [10, 25, 50, 100].forEach(s => {
+    html += `<option value="${s}" ${pageSize === s ? "selected" : ""}>${s}</option>`;
+  });
+  html += `</select>`;
+
+  html += `<button ${currentPage <= 1 ? "disabled" : ""} onclick="window.app.goToPage(${currentPage - 1})">${prevLabel}</button>`;
+
+  const maxButtons = 5;
+  let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+  let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+  if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+
+  if (startPage > 1) {
+    html += `<button onclick="window.app.goToPage(1)">1</button>`;
+    if (startPage > 2) html += `<span class="page-info">...</span>`;
+  }
+  for (let i = startPage; i <= endPage; i++) {
+    html += `<button class="${i === currentPage ? "active" : ""}" onclick="window.app.goToPage(${i})">${i}</button>`;
+  }
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) html += `<span class="page-info">...</span>`;
+    html += `<button onclick="window.app.goToPage(${totalPages})">${totalPages}</button>`;
+  }
+
+  html += `<button ${currentPage >= totalPages ? "disabled" : ""} onclick="window.app.goToPage(${currentPage + 1})">${nextLabel}</button>`;
+
+  const from = (currentPage - 1) * pageSize + 1;
+  const to = Math.min(currentPage * pageSize, totalItems);
+  html += `<span class="page-info">${from}-${to} / ${totalItems}</span>`;
+
+  document.getElementById("pagination").innerHTML = html;
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderGuestTable();
+}
+
+function setPageSize(size) {
+  pageSize = size;
+  currentPage = 1;
+  renderGuestTable();
+}
+
 // ===== EXPOSE TO GLOBAL =====
 window.app = {
   toggleChildren,
@@ -589,6 +656,8 @@ window.app = {
   saveNewGuest,
   saveEditGuest,
   confirmDelete: showConfirmDelete,
+  goToPage,
+  setPageSize,
 };
 
 // ===== START =====
