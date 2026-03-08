@@ -175,27 +175,48 @@ function renderSummary() {
   const total = guests.length;
   const accepted = guests.filter((g) => g.confirmed).length;
   const notAccepted = total - accepted;
+  const apologized = guests.filter((g) => g.communicated).length;
+  const notApologized = total - apologized;
   const totalChildren = guests.reduce(
     (sum, g) => sum + (g.children?.length || 0),
     0
   );
+  const pct = (v) => total === 0 ? 0 : Math.round((v / total) * 100);
 
   document.getElementById("summary-cards").innerHTML = `
-    <div class="summary-card">
-      <div class="summary-value">${total}</div>
-      <div class="summary-label">${t("totalGuests")}</div>
-    </div>
-    <div class="summary-card green">
-      <div class="summary-value">${accepted}</div>
-      <div class="summary-label">${t("confirmed")}</div>
-    </div>
-    <div class="summary-card red">
-      <div class="summary-value">${notAccepted}</div>
-      <div class="summary-label">${t("notConfirmed")}</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-value">${totalChildren}</div>
-      <div class="summary-label">${t("totalChildren")}</div>
+    <div class="summary-overview">
+      <div class="summary-top">
+        <div class="summary-top-item">
+          <div class="summary-value">${total}</div>
+          <div class="summary-label">${t("totalGuests")}</div>
+        </div>
+        <div class="summary-top-item">
+          <div class="summary-value">${totalChildren}</div>
+          <div class="summary-label">${t("totalChildren")}</div>
+        </div>
+      </div>
+      <div class="summary-bars">
+        <div class="summary-bar-row bar-green">
+          <span class="summary-bar-label">${t("confirmed")}</span>
+          <div class="summary-bar-track"><div class="summary-bar-fill" style="width:${pct(accepted)}%"></div></div>
+          <span class="summary-bar-count">${accepted}/${total}</span>
+        </div>
+        <div class="summary-bar-row bar-red">
+          <span class="summary-bar-label">${t("notConfirmed")}</span>
+          <div class="summary-bar-track"><div class="summary-bar-fill" style="width:${pct(notAccepted)}%"></div></div>
+          <span class="summary-bar-count">${notAccepted}/${total}</span>
+        </div>
+        <div class="summary-bar-row bar-orange">
+          <span class="summary-bar-label">${t("communicated")}</span>
+          <div class="summary-bar-track"><div class="summary-bar-fill" style="width:${pct(apologized)}%"></div></div>
+          <span class="summary-bar-count">${apologized}/${total}</span>
+        </div>
+        <div class="summary-bar-row bar-blue">
+          <span class="summary-bar-label">${t("notCommunicated")}</span>
+          <div class="summary-bar-track"><div class="summary-bar-fill" style="width:${pct(notApologized)}%"></div></div>
+          <span class="summary-bar-count">${notApologized}/${total}</span>
+        </div>
+      </div>
     </div>
   `;
 }

@@ -268,34 +268,102 @@ body {
   font-size: 12px;
 }
 
-/* ===== SUMMARY CARDS ===== */
+/* ===== SUMMARY OVERVIEW ===== */
 .summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
   margin-bottom: 24px;
 }
 
-.summary-card {
+.summary-overview {
   background: var(--white);
   border-radius: var(--radius);
-  padding: 16px;
-  text-align: center;
+  padding: 20px 24px;
   box-shadow: var(--shadow);
-  border-top: 3px solid var(--gold);
 }
 
-.summary-card.green { border-top-color: var(--green); }
-.summary-card.red { border-top-color: var(--red); }
-.summary-card.blue { border-top-color: var(--blue); }
-.summary-card.orange { border-top-color: var(--orange); }
+.summary-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
 
-.summary-value {
-  font-size: 28px;
+.summary-top-item {
+  text-align: center;
+  flex: 1;
+}
+
+.summary-top-item .summary-value {
+  font-size: 26px;
   font-weight: 700;
   color: var(--charcoal);
   font-family: 'Playfair Display', serif;
 }
+
+.summary-top-item .summary-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.summary-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+}
+
+.summary-bar-label {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+.summary-bar-track {
+  flex: 1;
+  height: 28px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.summary-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+.summary-bar-count {
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 50px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.bar-green .summary-bar-label,
+.bar-green .summary-bar-count { color: var(--green); }
+.bar-green .summary-bar-fill { background: var(--green); }
+
+.bar-red .summary-bar-label,
+.bar-red .summary-bar-count { color: var(--red); }
+.bar-red .summary-bar-fill { background: var(--red); }
+
+.bar-blue .summary-bar-label,
+.bar-blue .summary-bar-count { color: var(--blue); }
+.bar-blue .summary-bar-fill { background: var(--blue); }
+
+.bar-orange .summary-bar-label,
+.bar-orange .summary-bar-count { color: var(--orange); }
+.bar-orange .summary-bar-fill { background: var(--orange); }
 
 [dir="rtl"] .summary-value {
   font-family: 'Tajawal', serif;
@@ -745,8 +813,9 @@ body {
     justify-content: center;
   }
 
-  .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
+  .summary-bar-label {
+    min-width: 70px;
+    font-size: 12px;
   }
 
   /* Card layout for mobile */
@@ -819,8 +888,9 @@ body {
 }
 
 @media (max-width: 400px) {
-  .summary-cards {
-    grid-template-columns: 1fr;
+  .summary-bar-label {
+    min-width: 60px;
+    font-size: 11px;
   }
 
   .countdown-item {
