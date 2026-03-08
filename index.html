@@ -848,9 +848,9 @@
     ar: {
       siteTitle: "هشام & وجدان", subtitle: "إدارة دعوات الزفاف",
       groomTab: "قائمة العريس", brideTab: "قائمة العروس",
-      totalGuests: "إجمالي المدعوين", confirmed: "تم التأكيد",
-      notConfirmed: "لم يتم التأكيد", communicated: "تم التواصل",
-      notCommunicated: "لم يتم التواصل", totalChildren: "إجمالي الأطفال",
+      totalGuests: "إجمالي المدعوين", confirmed: "تم القبول",
+      notConfirmed: "لم يتم القبول", communicated: "تم الاعتذار",
+      notCommunicated: "لم يتم الاعتذار", totalChildren: "إجمالي الأطفال",
       name: "الاسم", phone: "رقم الجوال", children: "الأطفال",
       childrenCount: "عدد الأطفال", notes: "ملاحظات",
       addGuest: "إضافة مدعو", deleteGuest: "حذف", edit: "تعديل",
@@ -871,9 +871,9 @@
     en: {
       siteTitle: "Hesham & Wejdan", subtitle: "Wedding Invitation Manager",
       groomTab: "Groom's List", brideTab: "Bride's List",
-      totalGuests: "Total Guests", confirmed: "Confirmed",
-      notConfirmed: "Not Confirmed", communicated: "Communicated",
-      notCommunicated: "Not Communicated", totalChildren: "Total Children",
+      totalGuests: "Total Guests", confirmed: "Accepted",
+      notConfirmed: "Not Accepted", communicated: "Apologized",
+      notCommunicated: "Not Apologized", totalChildren: "Total Children",
       name: "Name", phone: "Phone", children: "Children",
       childrenCount: "Children", notes: "Notes",
       addGuest: "Add Guest", deleteGuest: "Delete", edit: "Edit",
@@ -1361,14 +1361,11 @@
     const guests = getGuests();
     const total = guests.length;
     const confirmed = guests.filter(g => g.confirmed).length;
-    const communicated = guests.filter(g => g.communicated).length;
     const totalChildren = guests.reduce((s, g) => s + (g.children?.length || 0), 0);
     $("summary-cards").innerHTML = `
       <div class="stat-chip default"><span class="stat-num">${total}</span><span class="stat-label">${t("totalGuests")}</span></div>
       <div class="stat-chip green"><span class="stat-num">${confirmed}</span><span class="stat-label">${t("confirmed")}</span></div>
       <div class="stat-chip red"><span class="stat-num">${total - confirmed}</span><span class="stat-label">${t("notConfirmed")}</span></div>
-      <div class="stat-chip blue"><span class="stat-num">${communicated}</span><span class="stat-label">${t("communicated")}</span></div>
-      <div class="stat-chip orange"><span class="stat-num">${total - communicated}</span><span class="stat-label">${t("notCommunicated")}</span></div>
       <div class="stat-chip default"><span class="stat-num">${totalChildren}</span><span class="stat-label">${t("totalChildren")}</span></div>
     `;
   }
@@ -1630,7 +1627,7 @@
   function handleExport() {
     const guests = getGuests();
     const isAr = currentLang === "ar";
-    const headers = isAr ? ["الاسم","رقم الجوال","تم التواصل","تم التأكيد","الأطفال","ملاحظات"] : ["Name","Phone","Communicated","Confirmed","Children","Notes"];
+    const headers = isAr ? ["الاسم","رقم الجوال","تم الاعتذار","تم القبول","الأطفال","ملاحظات"] : ["Name","Phone","Apologized","Accepted","Children","Notes"];
     const yesNo = (v) => v ? t("yes") : t("no");
     const rows = guests.map(g => [g.name||"",g.phone||"",yesNo(g.communicated),yesNo(g.confirmed),(g.children||[]).map(c=>c.name).join(", "),g.notes||""]);
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
@@ -1651,8 +1648,8 @@
       const guests = rows.map(row => ({
         name: row["الاسم"]||row["Name"]||row["name"]||"",
         phone: String(row["رقم الجوال"]||row["Phone"]||row["phone"]||""),
-        communicated: parseBool(row["تم التواصل"]||row["Communicated"]||row["communicated"]),
-        confirmed: parseBool(row["تم التأكيد"]||row["Confirmed"]||row["confirmed"]),
+        communicated: parseBool(row["تم الاعتذار"]||row["تم التواصل"]||row["Apologized"]||row["Communicated"]||row["communicated"]),
+        confirmed: parseBool(row["تم القبول"]||row["تم التأكيد"]||row["Accepted"]||row["Confirmed"]||row["confirmed"]),
         children: (row["الأطفال"]||row["Children"]||row["children"]||"").toString().split(",").map(s=>s.trim()).filter(Boolean).map(name=>({name})),
         notes: row["ملاحظات"]||row["Notes"]||row["notes"]||"",
       }));

@@ -173,10 +173,8 @@ function renderAll() {
 function renderSummary() {
   const guests = currentTab === "groom_guests" ? groomGuests : brideGuests;
   const total = guests.length;
-  const confirmed = guests.filter((g) => g.confirmed).length;
-  const notConfirmed = total - confirmed;
-  const communicated = guests.filter((g) => g.communicated).length;
-  const notCommunicated = total - communicated;
+  const accepted = guests.filter((g) => g.confirmed).length;
+  const notAccepted = total - accepted;
   const totalChildren = guests.reduce(
     (sum, g) => sum + (g.children?.length || 0),
     0
@@ -188,20 +186,12 @@ function renderSummary() {
       <div class="summary-label">${t("totalGuests")}</div>
     </div>
     <div class="summary-card green">
-      <div class="summary-value">${confirmed}</div>
+      <div class="summary-value">${accepted}</div>
       <div class="summary-label">${t("confirmed")}</div>
     </div>
     <div class="summary-card red">
-      <div class="summary-value">${notConfirmed}</div>
+      <div class="summary-value">${notAccepted}</div>
       <div class="summary-label">${t("notConfirmed")}</div>
-    </div>
-    <div class="summary-card blue">
-      <div class="summary-value">${communicated}</div>
-      <div class="summary-label">${t("communicated")}</div>
-    </div>
-    <div class="summary-card orange">
-      <div class="summary-value">${notCommunicated}</div>
-      <div class="summary-label">${t("notCommunicated")}</div>
     </div>
     <div class="summary-card">
       <div class="summary-value">${totalChildren}</div>

@@ -55,10 +55,10 @@ export function parseExcelFile(file) {
           const phone =
             row["رقم الجوال"] || row["Phone"] || row["phone"] || "";
           const communicated = parseBool(
-            row["تم التواصل"] || row["Communicated"] || row["communicated"]
+            row["تم الاعتذار"] || row["تم التواصل"] || row["Apologized"] || row["Communicated"] || row["communicated"]
           );
           const confirmed = parseBool(
-            row["تم التأكيد"] || row["Confirmed"] || row["confirmed"]
+            row["تم القبول"] || row["تم التأكيد"] || row["Accepted"] || row["Confirmed"] || row["confirmed"]
           );
           const childrenStr =
             row["الأطفال"] || row["Children"] || row["children"] || "";
